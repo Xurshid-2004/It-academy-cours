@@ -16,7 +16,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { lesson } from "../toolkit";
 
-const Tlesson = (props: any) => {
+const Tlesson = () => {
   const [addLesson, { isLoading }] = useAddLessonMutation();
 
   const [modules, setModules] = useState<any[]>([
