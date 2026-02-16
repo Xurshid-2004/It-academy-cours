@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Home from "./Home";
 import Teacher from "./bigteacher/Teacher";
 import Student from "./student/Student";
@@ -14,7 +14,6 @@ import Folder from "./student/Folder";
 const App = () => {
   const getToken = () => localStorage.getItem("token");
   const getRole = () => localStorage.getItem("role");
-  const location = useLocation();
 const navigate=useNavigate()
 
   return (
