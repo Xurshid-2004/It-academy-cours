@@ -7,7 +7,7 @@ import { actions } from "./toolkit";
 const SignIn = () => {
 const [state, setState] = useState({ email: "", password: "" });
 // bacend ,malumot
-const { data } = useGetUsersQuery("/users");
+const { data } = useGetUsersQuery();
 const navigate =useNavigate()
 
 
@@ -83,7 +83,7 @@ if(user.role==="teacher"){
 return (
   <div className=" h-[532px] justify-start  flex flex-col  bg-gradient-to-r from-rose-400 via-violet-600 to-indigo-900 p-8 text-white rounded">
 
-      <div className="w-1/4 shdow bg-blue-200 rounded mt-4 p-3 mx-auto">
+      <div className="md:w-1/4 shdow bg-blue-200 rounded mt-4 p-3 mx-auto">
         <input
           onChange={(e) => setState({ ...state, email: e.target.value })}
           className="form-control mb-2"
@@ -93,8 +93,8 @@ return (
         <input
           onChange={(e) => setState({ ...state, password: e.target.value })}
           className="form-control mb-2"
-          placeholder="pasword"
-          type="text"
+          placeholder="password"
+          type="password"
         />
         <button onClick={checkUser} className="btn btn-success mb-2 w-full">
           sign in

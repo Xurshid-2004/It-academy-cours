@@ -1,65 +1,82 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import { db } from "./firebase";
+import { ref, get, push, update } from "firebase/database";
+
+interface User {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  password: string;
+  role: string;
+  token: string;
+}
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3001" }),
+  baseQuery: fakeBaseQuery(),
   tagTypes: ["User"],
 
   endpoints: (build) => ({
-    // olib kelish
-    getUsers: build.query({
-      query: (url) => url,
-      providesTags: (result: any) =>
+    // Barcha foydalanuvchilarni olish
+    getUsers: build.query<User[], void>({
+      async queryFn() {
+        try {
+          const snapshot = await get(ref(db, "users"));
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const users = Object.entries(data).map(([id, value]: any) => ({
+              id,
+              ...value,
+            }));
+            return { data: users };
+          }
+          return { data: [] };
+        } catch (error: any) {
+          return { error: error.message };
+        }
+      },
+      providesTags: (result: User[] | undefined) =>
         result
           ? [
-              ...result.map(({ id }: any) => ({ type: "User", id })),
-              { type: "User", id: "LIST" },
+              ...result.map(({ id }) => ({ type: "User" as const, id })),
+              { type: "User" as const, id: "LIST" },
             ]
-          : [{ type: "User", id: "LIST" }],
+          : [{ type: "User" as const, id: "LIST" }],
     }),
 
-    // saqlash
-    addUser: build.mutation({
-      query: (body) => {
-        const length = 10;
-        const chars = "sdfghjjklzxcvbnbfghjkkjhghjm123456789876";
-        let token = "";
+    // Yangi foydalanuvchi qo'shish
+    addUser: build.mutation<User, Partial<User>>({
+      async queryFn(body) {
+        try {
+          const chars = "sdfghjjklzxcvbnbfghjkkjhghjm123456789876";
+          const token = Array.from({ length: 10 }, () =>
+            chars[Math.floor(Math.random() * chars.length)]
+          ).join("");
 
-        for (let i = 0; i < length; i++) {
-          const randomIndex = Math.floor(Math.random() * chars.length);
-          token = token + chars[randomIndex];
+          const newRef = await push(ref(db, "users"), { ...body, token });
+          return { data: { id: newRef.key!, ...body, token } as User };
+        } catch (error: any) {
+          return { error: error.message };
         }
-        return {
-          url: "/users",
-          method: "POST",
-          body: {
-            ...body,
-            token: token,
-          },
-        };
       },
       invalidatesTags: [{ type: "User", id: "LIST" }],
     }),
-    
-// editqilish
-getEdit:build.mutation({
-query:(data)=>{
-const {id,...body}=data;
-return{
-  url:`/users/${id}`,
-  method:"PUT",
-  body
-}
-},
-invalidatesTags:[{type:"User",id:"LIST"}]
-})
 
-// editqilish
-
+    // Foydalanuvchini tahrirlash
+    getEdit: build.mutation<User, { id: string } & Partial<User>>({
+      async queryFn(data) {
+        try {
+          const { id, ...body } = data;
+          await update(ref(db, `users/${id}`), body);
+          return { data: { id, ...body } as User };
+        } catch (error: any) {
+          return { error: error.message };
+        }
+      },
+      invalidatesTags: [{ type: "User", id: "LIST" }],
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useAddUserMutation,useGetEditMutation } = userApi;
-
-
-
+export const { useGetUsersQuery, useAddUserMutation, useGetEditMutation } = userApi;

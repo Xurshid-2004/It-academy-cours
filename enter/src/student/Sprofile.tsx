@@ -4,10 +4,31 @@ import { Drawer } from "vaul";
 import { connect } from "react-redux";
 import { actions } from "../toolkit";
 
-const Sprofile = (props: any) => {
-  const { data } = useGetUsersQuery("/users");
+interface User {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  password: string;
+  role: string;
+  token: string;
+}
+
+interface Props {
+  count?: any;
+  current?: number | null;
+  user?: User;
+  getName?: (name: string) => void;
+  getPhone?: (phone: string) => void;
+  getEmail?: (email: string) => void;
+  getPass?: (password: string) => void;
+  getEdit?: (user: User) => void;
+}
+
+const Sprofile = (props: Props) => {
+  const { data } = useGetUsersQuery();
   const id = localStorage.getItem("id");
-  const info = data?.filter((item: any) => item.id === id && item.role === "student");
+  const info = data?.filter((item: User) => item.id === id && item.role === "student");
 
   const [addUser] = useAddUserMutation();
   const [getEdit] = useGetEditMutation();
@@ -30,9 +51,9 @@ const Sprofile = (props: any) => {
   }, []);
 
   function save() {
-    if (props.current === null) {
+    if (props.current === null && props.user) {
       addUser(props.user);
-    } else {
+    } else if (props.user) {
       getEdit(props.user);
     }
   }
@@ -49,26 +70,26 @@ const Sprofile = (props: any) => {
               <Drawer.Title className="text-xl font-bold mt-4">Edit Student</Drawer.Title>
               <div className="flex flex-col gap-3 mt-4">
                 <input
-                  value={props.user.name}
-                  onChange={(e) => props.getName(e.target.value)}
+                  value={props.user?.name || ''}
+                  onChange={(e) => props.getName?.(e.target.value)}
                   className="border p-2 rounded"
                   placeholder="Name"
                 />
                 <input
-                  value={props.user.phone}
-                  onChange={(e) => props.getPhone(e.target.value)}
+                  value={props.user?.phone || ''}
+                  onChange={(e) => props.getPhone?.(e.target.value)}
                   className="border p-2 rounded"
                   placeholder="Phone"
                 />
                 <input
-                  value={props.user.email}
-                  onChange={(e) => props.getEmail(e.target.value)}
+                  value={props.user?.email || ''}
+                  onChange={(e) => props.getEmail?.(e.target.value)}
                   className="border p-2 rounded"
                   placeholder="Email"
                 />
                 <input
-                  value={props.user.password}
-                  onChange={(e) => props.getPass(e.target.value)}
+                  value={props.user?.password || ''}
+                  onChange={(e) => props.getPass?.(e.target.value)}
                   className="border p-2 rounded"
                   placeholder="Password"
                 />
@@ -99,7 +120,7 @@ const Sprofile = (props: any) => {
             <h2 className="text-2xl font-bold text-white mb-6">About you: Student</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {info?.map((item: any, i: number) => (
+              {info?.map((item: User, i: number) => (
                 <div
                   key={i}
                   className="bg-black/40 backdrop-blur-md text-white rounded-xl p-4 flex flex-col gap-2"
@@ -111,7 +132,7 @@ const Sprofile = (props: any) => {
                   <p>Password: {item.password}</p>
                   <button
                     className="btn btn-danger mt-2"
-                    onClick={() => { setOpen(true); props.getEdit(item); }}
+                    onClick={() => { setOpen(true); props.getEdit?.(item); }}
                   >
                     Edit
                   </button>
