@@ -49,7 +49,7 @@ const Tlesson = () => {
         type: item.select,
         url: item.url,
         video: item.vidyo,
-        teacherId: localStorage.getItem("id"),
+        teacherId: localStorage.getItem("id") || "",
       };
       await addTeacher(dataToSend).unwrap();
       toast.success("Saqlandi!");

@@ -7,7 +7,7 @@ import  { connect } from "react-redux";
 import { actions } from "../toolkit";
 
 const Profil = (props:any) => {
-  const { data } = useGetUsersQuery("/users");
+  const { data } = useGetUsersQuery();
   const [addUser]=useAddUserMutation();
   const [getEdit]=useGetEditMutation();
   const id=localStorage.getItem("id")
